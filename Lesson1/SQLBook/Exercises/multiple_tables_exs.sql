@@ -186,35 +186,46 @@ VALUES ('LS Burger', 3.00, 'Burger', 10), ('LS Cheeseburger', 3.50, 'Burger', 15
 -- Aaron has one order, consisting of an LS Burger and Fries. It has a status of 'Placed'.
 
 -- Assume that the order_status field of the orders table can hold strings of up to 20 characters.
+DROP TABLE orders;
 
 CREATE TABLE orders (
   id serial PRIMARY KEY,
-  customer_id int NOT NULL,
-  order_status varchar(20) NOT NULL,
-  item1 int,
-  item2 int,
-  item3 int,
-  item4 int,
-  item5 int,
-  item6 int,
-  item7 int,
-  FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE,
-  FOREIGN KEY (item1) REFERENCES products(id),
-  FOREIGN KEY (item2) REFERENCES products(id),
-  FOREIGN KEY (item3) REFERENCES products(id),
-  FOREIGN KEY (item4) REFERENCES products(id),
-  FOREIGN KEY (item5) REFERENCES products(id),
-  FOREIGN KEY (item6) REFERENCES products(id),
-  FOREIGN KEY (item7) REFERENCES products(id)
+  order_status varchar(25),
+  customer_id int NOT NULL REFERENCES customers(id) ON DELETE CASCADE
 );
 
-INSERT INTO orders (customer_id, order_status, item1, item2, item3, item4, item5, item6, item7)
-VALUES (2, 'In Progress', 3, 5, 6, 8, NULL, NULL, NULL),
-(1, 'Placed', 2, 5, 7, NULL, NULL, NULL, NULL), 
-(1, 'Complete', 4, 2, 5, 5, 6, 10, 9),
-(3, 'Placed', 1, 5, NULL, NULL, NULL, NULL, NULL);
--- Natasha has two orders. The first consists of a Cheeseburger, Fries, and a Cola,
---  and has a status of 'Placed'; the second consists of a Double Deluxe Burger, a Cheeseburger, 
---  two sets of Fries, Onion Rings, a Chocolate Shake and a Vanilla Shake, and has a status of 'Complete'.
+CREATE TABLE orders_items (
+  id serial PRIMARY KEY,
+  order_id int NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+  product_id int NOT NULL REFERENCES products(id) ON DELETE CASCADE
+);
 
--- Aaron has one order, consisting of an LS Burger and Fries. It has a status of 'Placed'.
+INSERT INTO orders (customer_id, order_status)
+VALUES (1, 'In Progress'),
+(2, 'Placed'),
+(2, 'Complete'),
+(3, 'Placed');
+
+INSERT INTO orders_items (order_id, product_id)
+VALUES (1, 3),
+(1, 5),
+(1, 6),
+(1, 8),
+(2, 2),
+(2, 5),
+(2, 7),
+(3, 4),
+(3, 2),
+(3, 5),
+(3, 5),
+(3, 6),
+(3, 10),
+(3, 9),
+(4, 1),
+(4, 5);
+
+SELECT customers.customer_name, 
+  (SELECT avg(products.product_cost) AS "Avg cost of items ordered"
+    FROM products 
+      WHERE products.id IN (SELECT product_id FROM orders_items))
+  FROM customers;
