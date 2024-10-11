@@ -62,13 +62,18 @@ SELECT customers.id, customers.email, count(DISTINCT tickets.event_id) AS purcha
 -- with the email address 'gennaro.rath@mcdermott.co'. The report should include 
 -- the event name and starts_at and the seat's section name, row, and seat number.
 
-SELECT events.name, events.starts_at, sections.name AS section_name, 
-seats.row AS section_row, seats.number AS seat_number FROM tickets 
-  JOIN (SELECT * FROM customers WHERE email = 'gennaro.rath@mcdermott.co') AS geno
-    ON tickets.customer_id = geno.id
-  JOIN events ON tickets.event_id = events.id
-  JOIN seats ON tickets.seat_id = seats.id
-  JOIN sections ON sections.id = seats.section_id;
+SELECT events.name AS event, events.starts_at, sections.name AS section,
+       seats.row, seats.number AS seat
+  FROM customers
+  JOIN tickets 
+    ON tickets.customer_id = customers.id
+  JOIN seats 
+    ON seats.id = tickets.seat_id
+  JOIN sections 
+    ON seats.section_id = sections.id
+  JOIN events 
+    ON tickets.event_id = events.id
+  WHERE customers.email = 'gennaro.rath@mcdermott.co';
 
 
 
